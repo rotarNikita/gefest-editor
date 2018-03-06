@@ -1,0 +1,12 @@
+@import "./forms/flat";
+
+.aside {
+  background-color: #90a4ae;
+  grid-column: span 3;
+  overflow: auto;
+  &_inner {
+    padding: 10px;
+    text-align: center;
+    transition: opacity .3s;
+  }
+}

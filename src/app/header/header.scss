@@ -1,0 +1,7 @@
+.header {
+  background-color: #E57373;
+  grid-row: span 1;
+  grid-column: span 12;
+}
+
+@import './toolbar/toolbar';

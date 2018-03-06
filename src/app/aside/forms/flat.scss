@@ -1,0 +1,25 @@
+.flat {
+  .fixed-action-btn.horizontal {
+    position: absolute;
+    top: -19px;
+    right: 19px;
+    bottom: unset;
+  }
+  .fixed-action-btn ul a.btn-floating {
+    transform: translateY(-37%)!important;
+  }
+  &.selected {
+    .card {
+      border: 3px solid #9c27b0;
+    }
+  }
+  &_color {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
