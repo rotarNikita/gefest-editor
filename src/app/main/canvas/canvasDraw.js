@@ -89,7 +89,7 @@ export class CanvasDraw extends Functionality {
         }
     }
 
-    static hexToRgbA (hex){
+    static hexToRgbA (hex) {
         let c;
         if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
             c = hex.substring(1).split('');
@@ -103,6 +103,14 @@ export class CanvasDraw extends Functionality {
             return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.4)';
         }
         throw new Error('Bad Hex');
+    }
+
+    static rgbaToHex (rgb) {
+        rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+        return (rgb && rgb.length === 4) ? "#" +
+            ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+            ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+            ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
     }
 
     cursorPosition (event) {

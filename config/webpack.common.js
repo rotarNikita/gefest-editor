@@ -6,7 +6,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const DIRECTION = settings.DIRECTION;
 const HASH = settings.HASH;
-const NODE_ENV = settings.NODE_ENV;
 
 module.exports = {
     context: path.resolve(DIRECTION, 'src'),

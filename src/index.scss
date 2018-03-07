@@ -5,3 +5,10 @@
 @import './app/aside/aside';
 @import './app/main/main';
 @import './app/loader/loader';
+
+.btn, .btn-large {
+  background-color: #09529f;
+  &:hover {
+    background-color: darken(#09529f, 10%);
+  }
+}
