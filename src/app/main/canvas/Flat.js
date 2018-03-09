@@ -35,6 +35,11 @@ export default class Flat {
         this.cardDescription = this.block.querySelector('.card-description');
         this.cardDescription.addEventListener('input', this.changeDescription.bind(this));
 
+        this.cardSection = this.block.querySelector('.card-section');
+        this.cardSection.children[0].setAttribute('id', `card-section${this.id}`);
+        this.cardSection.children[1].setAttribute('for', `card-section${this.id}`);
+        this.cardSection.children[0].addEventListener('change', this.checkboxChange.bind(this));
+
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.setAttribute('id', `flat_modal${this.id}`);
@@ -52,10 +57,12 @@ export default class Flat {
         this.color = '#fff';
         this.points = [];
         this.label = {
-            title: undefined,
-            description: undefined,
-            descriptionOffset: undefined,
+            title: '',
+            description: '',
+            descriptionOffset: '',
             sale: false,
+            section: false,
+            sectionBorder: [],
             position: {
                 x: 0,
                 y: canvasDraw.fontSize
@@ -86,6 +93,41 @@ export default class Flat {
     }
 
     stringifyCode () {
+        if (canvasDraw.label.section) this.stringifyCodeSection();
+        else this.stringifyCodeFlat();
+    }
+
+    stringifyCodeSection () {
+        this.textAreaCode.value = '';
+
+        if (canvasDraw.points.length) {
+            let path = `M${canvasDraw.points[0].x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.points[0].y / mainImage.size.height * mainImage.size.naturalHeight} `;
+            for (let i = 1; i < canvasDraw.points.length; i++)
+                path += `L${canvasDraw.points[i].x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.points[i].y / mainImage.size.height * mainImage.size.naturalHeight} `;
+            path += 'Z';
+
+            this.textAreaCode.value = `<path class="single-object_choose_svg_path" d="${path}" fill="${canvasDraw.options.fillStyle}" />`;
+        }
+
+        if (canvasDraw.label.title) {
+            this.textAreaCode.value += '<g class="single-object_choose_svg_description">';
+
+            let path = `M${canvasDraw.label.sectionBorder[0].x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.sectionBorder[0].y / mainImage.size.height * mainImage.size.naturalHeight} `;
+            for (let i = 1; i < canvasDraw.label.sectionBorder.length; i++)
+                path += `L${canvasDraw.label.sectionBorder[i].x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.sectionBorder[i].y / mainImage.size.height * mainImage.size.naturalHeight} `;
+            path += 'Z';
+
+                this.textAreaCode.value += `<path d="${path}" />`;
+                this.textAreaCode.value += `<text transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.position.y / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
+                    this.textAreaCode.value += `<tspan class="stage" x="0">${canvasDraw.label.title}</tspan>`;
+                    this.textAreaCode.value += '<tspan x="0" dy="1.2em">планировки</tspan>';
+                    this.textAreaCode.value += '<tspan x="0" dy="1.2em">типового этажа</tspan>';
+                this.textAreaCode.value += '</text>';
+            this.textAreaCode.value += '</g>';
+        }
+    }
+
+    stringifyCodeFlat () {
         this.textAreaCode.value = '';
 
         if (canvasDraw.points.length) {
@@ -118,21 +160,7 @@ export default class Flat {
         }
     }
 
-    parseCode () {
-        // reset
-        this.color = '#fff';
-        this.points = [];
-        this.label = {
-            title: '',
-            description: '',
-            descriptionOffset: undefined,
-            sale: false,
-            position: {
-                x: 0,
-                y: canvasDraw.fontSize
-            }
-        };
-
+    parseCodeFlat () {
         // points
         try {
             const d = this.textAreaCode.value.match(/d="[^"]+"/i)[0].replace(/[^\d\s.]/g, '').trim().split(' ');
@@ -183,18 +211,80 @@ export default class Flat {
                 } catch (e) {}
             }
         }
+    }
+
+    parseCodeSection () {
+        this.label.section = true;
+
+        // points
+        try {
+            const d = this.textAreaCode.value.match(/<path class="single-object_choose_svg_path" d=".+?"/i)[0].replace(/[^\d\s.]/g, '').trim().split(' ');
+
+            for (let i = 0; i < d.length; i += 2) {
+                let x = +d[i] / mainImage.size.naturalWidth * mainImage.size.width;
+                let y = +d[i + 1] / mainImage.size.naturalHeight * mainImage.size.height;
+
+                this.points.push(new Point(x, y));
+            }
+        } catch (e) {}
+
+        // color
+        try {
+            const fill = this.textAreaCode.value.match(/<path class="single-object_choose_svg_path".+?fill="[^"]+".+?\/>/i)[0].replace(/(<path.+?fill="|".+?\/>)/g, '').trim();
+            this.color = CanvasDraw.rgbaToHex(fill);
+            this.block.children[0].style.background = this.color;
+        } catch (e) {}
+
+        // text position
+        let textPosition = undefined;
+
+        try {
+            textPosition = this.textAreaCode.value.match(/transform="translate\(\d+\.?\d+? \d+\.?\d+?\)"/i)[0].replace(/[^\d\s.]/g, '').trim().split(' ');
+            this.label.position.x = textPosition[0] / mainImage.size.naturalWidth * mainImage.size.width;
+            this.label.position.y = textPosition[1] / mainImage.size.naturalHeight * mainImage.size.height;
+        } catch (e) {}
+
+        // title
+        if (textPosition) {
+            try {
+                this.label.title = this.textAreaCode.value.match(/<tspan class="stage" x="0">.+?<\/tspan>/)[0].replace('<tspan class="stage" x="0">', '').replace('</tspan>', '');
+            } catch (e) {}
+        }
+    }
+
+    parseCode () {
+        // reset
+        this.color = '#fff';
+        this.points = [];
+        this.label = {
+            title: '',
+            description: '',
+            descriptionOffset: undefined,
+            sale: false,
+            section: false,
+            sectionBorder: [],
+            position: {
+                x: 0,
+                y: canvasDraw.fontSize
+            }
+        };
+
+        if (this.textAreaCode.value.indexOf('section_choose_path') > -1) this.parseCodeFlat();
+        else this.parseCodeSection();
 
         // inputs and styles
         this.cardTitle.value = this.label.title;
         this.cardDescription.value = this.label.description;
         this.label.sale = !!this.cardSale.children[0].checked;
         this.block.children[0].style.background = this.color;
+        this.cardSection.children[0].checked = this.label.section;
 
         this.addSelected();
     }
 
     checkboxChange () {
         this.label.sale = !!this.cardSale.children[0].checked;
+        this.label.section = !!this.cardSection.children[0].checked;
 
         canvasDraw.changeLabel(this.label);
     }

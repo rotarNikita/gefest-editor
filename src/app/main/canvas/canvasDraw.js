@@ -39,22 +39,36 @@ export class CanvasDraw extends Functionality {
         this.points = [];
 
         this.fontSize = 22;
+        this.fontSize2 = 12;
+        this.fontSize3 = 10;
 
         this.label = {
-            title: undefined,
-            description: undefined,
-            descriptionOffset: undefined,
+            title: '',
+            description: '',
+            descriptionOffset: '',
             sale: false,
+            section: false,
+            sectionBorder: [],
             position: {
                 x: 0,
                 y: this.fontSize
             }
-        }
+        };
+
+        this.SECTION_LABEL = {
+            width: 100,
+            height: 20,
+            triangle: 7,
+            paddingLeft: 10,
+            paddingTop: 20
+        };
     }
 
     changeLabel (label) {
         this.label.title = label.title;
         this.label.description = label.description;
+        this.label.sale = label.sale;
+        this.label.section = label.section;
         this.paintAndConnectPoints();
     }
 
@@ -74,7 +88,17 @@ export class CanvasDraw extends Functionality {
         this.canvas.width = size.width;
         this.canvas.height = size.height;
 
-        this.fontSize = 22 / size.naturalWidth * size.width;
+        this.fontSize = 22 ;
+        this.fontSize2 = 12 / size.naturalWidth * size.width;
+        this.fontSize3 = 10 / size.naturalWidth * size.width;
+
+        this.SECTION_LABEL = {
+            width: 100 / size.naturalWidth * size.width,
+            height: 20 / size.naturalWidth * size.width,
+            triangle: 7 / size.naturalWidth * size.width,
+            paddingLeft: 10 / size.naturalWidth * size.width,
+            paddingTop: 20 / size.naturalWidth * size.width,
+        };
 
         canvasSave.resize(size.width, size.height);
     }
@@ -153,9 +177,22 @@ export class CanvasDraw extends Functionality {
         ctx.fillStyle = options.fillStyle;
         ctx.fill();
 
-        const { label, fontSize } = this;
+        ctx.closePath();
+        ctx.beginPath();
 
-        if (!label.sale) {
+        const { label, fontSize, fontSize2, fontSize3 } = this;
+
+        if (label.section && label.title) {
+            this.drawSectionLabel();
+            
+            ctx.font = `700 ${fontSize2}px Arial`;
+            ctx.fillStyle = '#000000';
+            ctx.fillText(label.title, label.position.x, label.position.y);
+            
+            ctx.font = `${fontSize3}px Arial`;
+            ctx.fillText('планировки', label.position.x, label.position.y + fontSize3 * 1.1);
+            ctx.fillText('типового этажа', label.position.x, label.position.y + fontSize3 * 2.2);
+        } else if (!label.sale) {
             let titleWidth = null;
 
             if (label.title) {
@@ -173,13 +210,42 @@ export class CanvasDraw extends Functionality {
 
                 ctx.fillText(label.description,
                     label.position.x + label.descriptionOffset,
-                    label.position.y + (titleWidth ? fontSize : 0));
+                    label.position.y + (titleWidth ? fontSize * 1.1 : 0));
             }
         } else {
             ctx.font = `${fontSize}px Arial`;
             ctx.fillStyle = 'red';
             ctx.fillText('продано', label.position.x, label.position.y);
         }
+    }
+    
+    drawSectionLabel () {
+        const { ctx, label, SECTION_LABEL } = this;
+        const { x, y } = label.position;
+
+        label.sectionBorder = [];
+        label.sectionBorder.push(new Point(x - SECTION_LABEL.paddingLeft, y - SECTION_LABEL.paddingTop));
+        label.sectionBorder.push(new Point(label.sectionBorder[0].x + SECTION_LABEL.width, label.sectionBorder[0].y));
+        label.sectionBorder.push(new Point(label.sectionBorder[1].x, label.sectionBorder[1].y + SECTION_LABEL.height));
+        label.sectionBorder.push(new Point(label.sectionBorder[2].x + SECTION_LABEL.triangle, label.sectionBorder[2].y + SECTION_LABEL.triangle));
+        label.sectionBorder.push(new Point(label.sectionBorder[3].x - SECTION_LABEL.triangle, label.sectionBorder[3].y + SECTION_LABEL.triangle));
+        label.sectionBorder.push(new Point(label.sectionBorder[4].x, label.sectionBorder[4].y + SECTION_LABEL.height));
+        label.sectionBorder.push(new Point(label.sectionBorder[5].x - SECTION_LABEL.width, label.sectionBorder[5].y));
+
+        try {
+            ctx.moveTo(label.sectionBorder[0].x, label.sectionBorder[0].y);
+        } catch (e) {}
+
+        label.sectionBorder.forEach((point, i) => {
+            let nextPoint = label.sectionBorder[i + 1] || label.sectionBorder[0];
+            Point.connectTo(ctx, nextPoint);
+        });
+
+        ctx.strokeStyle = '#c4c4c4';
+        ctx.fillStyle ='#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fill();
     }
 
     drawStart (event) {

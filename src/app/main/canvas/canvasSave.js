@@ -33,7 +33,20 @@ class CanvasSave {
                 ctx.fillStyle = CanvasDraw.hexToRgbA(color);
                 ctx.fill();
 
-                if (!label.sale) {
+                ctx.closePath();
+                ctx.beginPath();
+
+                if (label.section && label.title) {
+                    this.drawSectionLabel(label);
+
+                    ctx.font = `700 ${canvasDraw.fontSize2}px Arial`;
+                    ctx.fillStyle = '#000000';
+                    ctx.fillText(label.title, label.position.x, label.position.y);
+
+                    ctx.font = `${canvasDraw.fontSize3}px Arial`;
+                    ctx.fillText('планировки', label.position.x, label.position.y + canvasDraw.fontSize3 * 1.1);
+                    ctx.fillText('типового этажа', label.position.x, label.position.y + canvasDraw.fontSize3 * 2.2);
+                } else if (!label.sale) {
                     if (label.title) {
                         ctx.font = `${canvasDraw.fontSize}px Arial`;
                         ctx.fillStyle = '#000000';
@@ -45,7 +58,7 @@ class CanvasSave {
                         ctx.fillStyle = '#000000';
                         ctx.fillText(label.description,
                             label.position.x + label.descriptionOffset,
-                            label.position.y + (label.title ? canvasDraw.fontSize : 0));
+                            label.position.y + (label.title ? canvasDraw.fontSize * 1.1 : 0));
                     }
                 } else {
                     ctx.font = `${canvasDraw.fontSize}px Arial`;
@@ -56,6 +69,25 @@ class CanvasSave {
                 ctx.closePath();
             }
         }
+    }
+
+    drawSectionLabel (label) {
+        const { ctx } = this;
+
+        try {
+            ctx.moveTo(label.sectionBorder[0].x, label.sectionBorder[0].y);
+        } catch (e) {}
+
+        label.sectionBorder.forEach((point, i) => {
+            let nextPoint = label.sectionBorder[i + 1] || label.sectionBorder[0];
+            Point.connectTo(ctx, nextPoint);
+        });
+
+        ctx.strokeStyle = '#c4c4c4';
+        ctx.fillStyle ='#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fill();
     }
 
     clearCanvas () {
