@@ -88,7 +88,7 @@ export class CanvasDraw extends Functionality {
         this.canvas.width = size.width;
         this.canvas.height = size.height;
 
-        this.fontSize = 22 ;
+        this.fontSize = 22 / size.naturalWidth * size.width;
         this.fontSize2 = 12 / size.naturalWidth * size.width;
         this.fontSize3 = 10 / size.naturalWidth * size.width;
 

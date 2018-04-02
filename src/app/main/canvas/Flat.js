@@ -139,25 +139,21 @@ export default class Flat {
             this.textAreaCode.value = `<path class="section_choose_path" d="${path}" fill="${canvasDraw.options.fillStyle}" />`;
         }
 
-        if (canvasDraw.label.sale || canvasDraw.label.title || canvasDraw.label.description) {
-            this.textAreaCode.value += `<text class="section_choose_description" transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.position.y / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
+        this.textAreaCode.value += `<text class="section_choose_description" transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.position.y / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
 
-            if (canvasDraw.label.sale) {
-                this.textAreaCode.value += '<tspan x="0" fill="red">продано</tspan>';
-            } else {
-                if (canvasDraw.label.title) {
-                    this.textAreaCode.value += `<tspan x="0">${canvasDraw.label.title}</tspan>`;
+        this.textAreaCode.value += '<tspan class="section_choose_sold" x="0" fill="red">продано</tspan>';
 
-                    if (canvasDraw.label.description) {
-                        this.textAreaCode.value += `<tspan x="${canvasDraw.label.descriptionOffset / mainImage.size.width * mainImage.size.naturalWidth}" dy="1.2em">${canvasDraw.label.description}</tspan>`;
-                    }
-                } else if (canvasDraw.label.description) {
-                    this.textAreaCode.value += `<tspan x="0">${canvasDraw.label.description}</tspan>`;
-                }
+        if (canvasDraw.label.title) {
+            this.textAreaCode.value += `<tspan x="0">${canvasDraw.label.title}</tspan>`;
+
+            if (canvasDraw.label.description) {
+                this.textAreaCode.value += `<tspan x="${canvasDraw.label.descriptionOffset / mainImage.size.width * mainImage.size.naturalWidth}" dy="1.2em">${canvasDraw.label.description}</tspan>`;
             }
-
-            this.textAreaCode.value += '</text>';
+        } else if (canvasDraw.label.description) {
+            this.textAreaCode.value += `<tspan x="0">${canvasDraw.label.description}</tspan>`;
         }
+
+        this.textAreaCode.value += '</text>';
     }
 
     parseCodeFlat () {
@@ -189,27 +185,27 @@ export default class Flat {
             this.label.position.y = textPosition[1] / mainImage.size.naturalHeight * mainImage.size.height;
         } catch (e) {}
 
-        // sale
         if (textPosition) {
-            this.label.sale =  /Продано/i.test(this.textAreaCode.value);
+            // sale
+            // try {
+            //     this.label.sale =  /Продано/i.test(this.textAreaCode.value);
+            // } catch (e) {}
 
-            if (!this.label.sale) {
-                // title
-                try {
-                    this.label.title = this.textAreaCode.value.match(/<tspan x="0">.+?<\/tspan>/)[0].replace('<tspan x="0">', '').replace('</tspan>', '');
-                } catch (e) {}
+            // title
+            try {
+                this.label.title = this.textAreaCode.value.match(/<tspan x="0">.+?<\/tspan>/)[0].replace('<tspan x="0">', '').replace('</tspan>', '');
+            } catch (e) {}
 
-                // description
-                try {
-                    const description = this.textAreaCode.value.match(/<tspan x="\d+\.?\d+?" dy="1.2em">.+?<\/tspan>/)[0];
+            // description
+            try {
+                const description = this.textAreaCode.value.match(/<tspan x="\d+\.?\d+?" dy="1.2em">.+?<\/tspan>/)[0];
 
-                    const offset = description.match(/x="\d+\.?\d+?"/)[0].replace(/(x=|")/g, '');
-                    const text = description.replace(/(<tspan x="\d+\.?\d+?" dy="1.2em">|<\/tspan>)/g, '');
+                const offset = description.match(/x="\d+\.?\d+?"/)[0].replace(/(x=|")/g, '');
+                const text = description.replace(/(<tspan x="\d+\.?\d+?" dy="1.2em">|<\/tspan>)/g, '');
 
-                    this.label.description = text;
-                    this.label.descriptionOffset = offset / mainImage.size.naturalWidth * mainImage.size.width;
-                } catch (e) {}
-            }
+                this.label.description = text;
+                this.label.descriptionOffset = offset / mainImage.size.naturalWidth * mainImage.size.width;
+            } catch (e) {}
         }
     }
 
@@ -275,7 +271,7 @@ export default class Flat {
         // inputs and styles
         this.cardTitle.value = this.label.title;
         this.cardDescription.value = this.label.description;
-        this.label.sale = !!this.cardSale.children[0].checked;
+        this.cardSale.children[0].checked = this.label.sale;
         this.block.children[0].style.background = this.color;
         this.cardSection.children[0].checked = this.label.section;
 
