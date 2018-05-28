@@ -72,8 +72,8 @@ export default class Flat {
         this.addSelected();
         block.addEventListener('click', this.addSelected.bind(this), true);
 
-        this.textAreaCode.addEventListener('click', this.copyToClipboard.bind(this));
-        this.copyAlert = modal.querySelector('.copy-wrapper');
+        block.querySelector('.flat_copy').addEventListener('click', this.copyToClipboard.bind(this));
+        this.copyAlert = block.querySelector('.copy-wrapper');
         this.copyAlertTimeout = null;
     }
 
@@ -94,8 +94,22 @@ export default class Flat {
 
     copyToClipboard() {
         this.copyAlertShow();
-        this.textAreaCode.select();
-        document.execCommand('copy');
+        this.stringifyCode();
+        var textArea = document.createElement("textarea");
+        textArea.value = this.textAreaCode.value;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            var msg = successful ? 'successful' : 'unsuccessful';
+            console.log('Fallback: Copying text command was ' + msg);
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
     }
 
     codeEditorOpen () {
