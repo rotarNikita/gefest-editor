@@ -71,6 +71,31 @@ export default class Flat {
 
         this.addSelected();
         block.addEventListener('click', this.addSelected.bind(this), true);
+
+        this.textAreaCode.addEventListener('click', this.copyToClipboard.bind(this));
+        this.copyAlert = modal.querySelector('.copy-wrapper');
+        this.copyAlertTimeout = null;
+    }
+
+    copyAlertShow() {
+        clearTimeout(this.copyAlertTimeout);
+
+        this.copyAlert.style.display = 'flex';
+        this.copyAlertTimeout = setTimeout(() => {
+            this.copyAlert.classList.add('show');
+            this.copyAlertTimeout = setTimeout(() => {
+                this.copyAlert.classList.remove('show');
+                this.copyAlertTimeout = setTimeout(() => {
+                    this.copyAlert.style.display = 'none';
+                }, 500)
+            }, 500)
+        }, 15)
+    }
+
+    copyToClipboard() {
+        this.copyAlertShow();
+        this.textAreaCode.select();
+        document.execCommand('copy');
     }
 
     codeEditorOpen () {

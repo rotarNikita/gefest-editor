@@ -26,3 +26,26 @@
     text-align: left;
   }
 }
+
+.copy-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(#fff, .3);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transition: opacity .5s;
+  opacity: 0;
+  &.show {
+    opacity: 1;
+  }
+}
+
+.copy {
+  font-size: 40px;
+  text-transform: uppercase;
+}
