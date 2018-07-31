@@ -56,7 +56,7 @@ export class CanvasDraw extends Functionality {
         };
 
         this.SECTION_LABEL = {
-            width: 100,
+            width: 130,
             height: 20,
             triangle: 7,
             paddingLeft: 10,
@@ -93,7 +93,7 @@ export class CanvasDraw extends Functionality {
         this.fontSize3 = 10 / size.naturalWidth * size.width;
 
         this.SECTION_LABEL = {
-            width: 100 / size.naturalWidth * size.width,
+            width: 130 / size.naturalWidth * size.width,
             height: 20 / size.naturalWidth * size.width,
             triangle: 7 / size.naturalWidth * size.width,
             paddingLeft: 10 / size.naturalWidth * size.width,
