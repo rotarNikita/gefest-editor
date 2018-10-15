@@ -148,7 +148,7 @@ export default class Flat {
             this.textAreaCode.value = `<path class="single-object_choose_svg_path" d="${path}" fill="${canvasDraw.options.fillStyle}" />`;
         }
 
-        if (canvasDraw.label.title) {
+        if (canvasDraw.label.title || canvasDraw.label.sale) {
             this.textAreaCode.value += '<g class="single-object_choose_svg_description">';
 
             let path = `M${canvasDraw.label.sectionBorder[0].x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.sectionBorder[0].y / mainImage.size.height * mainImage.size.naturalHeight} `;
@@ -157,10 +157,15 @@ export default class Flat {
             path += 'Z';
 
                 this.textAreaCode.value += `<path d="${path}" />`;
-                this.textAreaCode.value += `<text transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.position.y / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
+                if (canvasDraw.label.sale) {
+                    this.textAreaCode.value += `<text transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${(canvasDraw.label.position.y + canvasDraw.fontSize * 0.65) / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
+                    this.textAreaCode.value += `<tspan class="stage stage-sale" style="font-size: ${canvasDraw.fontSize}px;" x="0">Продано</tspan>`;
+                } else {
+                    this.textAreaCode.value += `<text transform="translate(${canvasDraw.label.position.x / mainImage.size.width * mainImage.size.naturalWidth} ${canvasDraw.label.position.y / mainImage.size.height * mainImage.size.naturalHeight})" x="0" y="0">`;
                     this.textAreaCode.value += `<tspan class="stage" x="0">${canvasDraw.label.title}</tspan>`;
                     this.textAreaCode.value += '<tspan x="0" dy="1.2em">планировки</tspan>';
                     this.textAreaCode.value += '<tspan x="0" dy="1.2em">типового этажа</tspan>';
+                }
                 this.textAreaCode.value += '</text>';
             this.textAreaCode.value += '</g>';
         }
@@ -282,7 +287,12 @@ export default class Flat {
         // title
         if (textPosition) {
             try {
-                this.label.title = this.textAreaCode.value.match(/<tspan class="stage" x="0">.+?<\/tspan>/)[0].replace('<tspan class="stage" x="0">', '').replace('</tspan>', '');
+                this.label.sale = /Продано/.test(this.textAreaCode.value);
+
+                if (!this.label.sale)
+                    this.label.title = this.textAreaCode.value.match(/<tspan class="stage" x="0">.+?<\/tspan>/)[0].replace('<tspan class="stage" x="0">', '').replace('</tspan>', '');
+                else
+                    this.label.position.y -= canvasDraw.fontSize * 0.65
             } catch (e) {}
         }
     }

@@ -182,16 +182,22 @@ export class CanvasDraw extends Functionality {
 
         const { label, fontSize, fontSize2, fontSize3 } = this;
 
-        if (label.section && label.title) {
+        if (label.section && (label.sale || label.title)) {
             this.drawSectionLabel();
-            
-            ctx.font = `700 ${fontSize2}px Arial`;
-            ctx.fillStyle = '#000000';
-            ctx.fillText(label.title, label.position.x, label.position.y);
-            
-            ctx.font = `${fontSize3}px Arial`;
-            ctx.fillText('планировки', label.position.x, label.position.y + fontSize3 * 1.1);
-            ctx.fillText('типового этажа', label.position.x, label.position.y + fontSize3 * 2.2);
+
+            if (label.sale) {
+                ctx.font = `700 ${fontSize}px Arial`;
+                ctx.fillStyle = '#000000';
+                ctx.fillText('Продано', label.position.x, label.position.y + fontSize * 0.65);
+            } else {
+                ctx.font = `700 ${fontSize2}px Arial`;
+                ctx.fillStyle = '#000000';
+                ctx.fillText(label.title, label.position.x, label.position.y);
+
+                ctx.font = `${fontSize3}px Arial`;
+                ctx.fillText('планировки', label.position.x, label.position.y + fontSize3 * 1.1);
+                ctx.fillText('типового этажа', label.position.x, label.position.y + fontSize3 * 2.2);
+            }
         } else if (!label.sale) {
             let titleWidth = null;
 
